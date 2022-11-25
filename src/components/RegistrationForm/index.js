@@ -1,3 +1,4 @@
+// Write your JS code here
 import {Component} from 'react'
 import './index.css'
 
@@ -6,59 +7,69 @@ class Registration extends Component {
     firstName: '',
     showSubmitForm: false,
     lastName: '',
-    firstNameErrorMsg: '',
-    lastNameErrorMsg: '',
+    firstNameError: false,
+    lastNameError: false,
   }
 
   onSubmitUserDetails = event => {
     event.preventDefault()
-    const {firstName, lastName} = this.state
 
-    if (firstName !== '' && lastName !== '') {
-      this.setState({
-        showSubmitForm: true,
-      })
-    } else if (firstName === '' && lastName !== '') {
-      this.setState({firstNameErrorMsg: 'Required', showSubmitForm: false})
-    } else if (lastName === '' && firstName !== '') {
-      this.setState({lastNameErrorMsg: 'Required', showSubmitForm: false})
+    const isValidFirstName = this.validateFirstName()
+    const isValidLastName = this.validateLastName()
+    if (isValidFirstName && isValidLastName) {
+      this.setState({showSubmitForm: true})
     } else {
       this.setState({
-        firstNameErrorMsg: 'Required',
-        lastNameErrorMsg: 'Required',
         showSubmitForm: false,
+        firstNameError: !isValidFirstName,
+        lastNameError: !isValidLastName,
       })
     }
+  }
+
+  validateLastName = () => {
+    const {lastName} = this.state
+    return lastName !== ''
+  }
+
+  onBlurLastName = () => {
+    const isValidLastName = this.validateLastName()
+    this.setState({lastNameError: !isValidLastName})
   }
 
   onChangeLastName = event => {
-    if (event.target.value === '') {
-      this.setState({lastNameErrorMsg: 'Required'})
-    } else {
-      this.setState({lastName: event.target.value})
-    }
+    const {value} = event.target
+    this.setState({lastName: value})
+  }
+
+  validateFirstName = () => {
+    const {firstName} = this.state
+    return firstName !== ''
+  }
+
+  onBlurFirstName = () => {
+    const isValidFirstName = this.validateFirstName()
+    this.setState({firstNameError: !isValidFirstName})
   }
 
   onChangeFirstName = event => {
-    if (event.target.value === '') {
-      this.setState({firstNameErrorMsg: 'Required'})
-    } else {
-      this.setState({firstName: event.target.value})
-    }
+    const {value} = event.target
+    this.setState({firstName: value})
   }
 
   onAnotherResponse = () => {
-    this.setState({
-      showSubmitForm: false,
-      firstNameErrorMsg: '',
-      lastNameErrorMsg: '',
-    })
+    this.setState(prevState => ({
+      firstName: '',
+      lastName: '',
+      showSubmitForm: !prevState.showSubmitForm,
+    }))
   }
 
   renderFirstName = () => {
-    const {firstNameErrorMsg, showSubmitForm, firstName} = this.state
-    const errorInputClassName =
-      firstNameErrorMsg === '' ? 'input' : `input blur-background`
+    const {firstNameError, firstName} = this.state
+    const errorInputClassName = firstNameError
+      ? 'input'
+      : `input blur-background`
 
     return (
       <div className="input-container">
@@ -66,21 +77,24 @@ class Registration extends Component {
           FIRST NAME
         </label>
         <input
+          value={firstName}
           placeholder="First name"
-          onBlur={this.onChangeFirstName}
+          onBlur={this.onBlurFirstName}
+          onChange={this.onChangeFirstName}
           className={errorInputClassName}
           id="first name"
           type="text"
         />
-        {!showSubmitForm && <p className="error-msg">{firstNameErrorMsg}</p>}
+        {firstNameError && <p className="error-msg">Required</p>}
       </div>
     )
   }
 
   renderLastName = () => {
-    const {lastNameErrorMsg, showSubmitForm} = this.state
-    const errorInputClassName =
-      lastNameErrorMsg === '' ? 'input' : `input blur-background`
+    const {lastNameError, lastName} = this.state
+    const errorInputClassName = lastNameError
+      ? 'input'
+      : `input blur-background`
 
     return (
       <div className="input-container">
@@ -88,13 +102,15 @@ class Registration extends Component {
           LAST NAME
         </label>
         <input
+          value={lastName}
           placeholder="Last name"
-          onBlur={this.onChangeLastName}
+          onBlur={this.onBlurLastName}
+          onChange={this.onChangeLastName}
           className={errorInputClassName}
           id="last name"
           type="text"
         />
-        {!showSubmitForm && <p className="error-msg">{lastNameErrorMsg}</p>}
+        {lastNameError && <p className="error-msg">Required</p>}
       </div>
     )
   }
